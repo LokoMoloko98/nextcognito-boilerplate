@@ -8,7 +8,11 @@ This is a boilerplate project for integrating AWS Cognito with a Next.js applica
 - AWS Cognito integration
 - Authentication (Sign Up, Sign In, Sign Out)
 - User management
-- Protected routes
+- Protected routes: Secure pages that only authenticated users can access.
+
+## Demo
+
+🚀 **Check out a live demo of the boilerplate application [here](https://main.d10g8xwe88n10r.amplifyapp.com/).** 🚀
 
 ## Getting Started
 
