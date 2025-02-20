@@ -147,9 +147,9 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
                 <MenuIcon />
               </IconButton>
             )}
-            <Typography variant="h6" sx={{ flexGrow: 1, letterSpacing: "0.1rem", fontWeight: "bold" }}>
+           <Typography variant="body1" sx={{ flexGrow: 1, letterSpacing: "0.1rem" }}>
               nextcognito-boilerplate
-            </Typography>
+          </Typography>
             <Button
               color="inherit"
               onClick={signOut}

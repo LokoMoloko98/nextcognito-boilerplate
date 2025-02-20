@@ -37,7 +37,7 @@ export default function Home() {
           }}
         >
           <Typography
-            variant="h3"
+            variant="h4"
             component="h1"
             sx={{ fontWeight: 'bold', color: 'primary.main', mt: 3 }}
           >
