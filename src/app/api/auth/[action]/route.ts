@@ -13,11 +13,17 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
     const { username, password, email } = await req.json();
     const { action } = await params;
 
-    const clientId = await getSecretValue('NEXT_PUBLIC_COGNITO_CLIENT_ID');
-    const region = await getSecretValue('NEXT_PUBLIC_AWS_REGION');
+    const clientIdSecret = await getSecretValue('NEXT_PUBLIC_COGNITO_CLIENT_ID');
+    const regionSecret  = await getSecretValue('NEXT_PUBLIC_AWS_REGION');
+
+    const clientId = String(clientIdSecret);
+    const region = String(regionSecret);
+
+    console.log("Client ID:", clientId, typeof clientId);  // Should log a valid string
+    console.log("Region:", region, typeof region);        // Should log a valid string
 
     const cognitoIdentityProviderClient = new CognitoIdentityProviderClient({
-      region: region || 'us-east-1',
+      region: regionSecret || 'us-east-1',
       credentials: fromEnv(),
     });
 
@@ -25,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
 
     if (action === 'signup') {
       command = new SignUpCommand({
-        ClientId:  clientId,
+        ClientId:  clientIdSecret,
         Username: username,
         Password: password,
         UserAttributes: [{ Name: 'email', Value: email }],
@@ -37,11 +43,10 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
         USERNAME: username, // Important: Case-sensitive!
         PASSWORD: password, // Important: Case-sensitive!
       };
-      console.log("Client ID:", clientId);
 
       command = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
-        ClientId: clientId,
+        ClientId: clientIdSecret,
         AuthParameters: authParams, // Use the correct structure here!
       });
 
