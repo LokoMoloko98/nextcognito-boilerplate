@@ -28,12 +28,11 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
   try {
     const { username, password, email } = await req.json();
     const { action } = await params;
-    const appId = process.env.AWS_APP_ID;
+    const appId = process.env.NEXT_PUBLIC_AWS_APP_ID;
     if (!appId) {
-      throw new Error("AWS_APP_ID is missing in environment variables.");
+      throw new Error("NEXT_PUBLIC_AWS_APP_ID is missing in environment variables.");
     }
     const clientId = await getSecret(`/amplify/shared/${appId}/NEXT_PUBLIC_COGNITO_CLIENT_ID`);
-    console.log("Cognito Client ID:", clientId);
     if (!clientId) throw new Error("Cognito Client ID is missing!");
 
     let command;
