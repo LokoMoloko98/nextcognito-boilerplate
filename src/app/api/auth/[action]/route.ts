@@ -1,45 +1,22 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { CognitoIdentityProviderClient, SignUpCommand, InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { fromEnv } from "@aws-sdk/credential-providers";
-import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
-const ssmClient = new SSMClient({ region: process.env.AWS_REGION || "us-east-1" });
 
 const cognitoIdentityProviderClient = new CognitoIdentityProviderClient({
   region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1',
   credentials: fromEnv(),
 });
 
-async function getSecret(parameterName: string, withDecryption = true): Promise<string | null> {
-  try {
-    const command = new GetParameterCommand({
-      Name: parameterName,
-      WithDecryption: withDecryption, // Decrypt SecureString parameters
-    });
-
-    const response = await ssmClient.send(command);
-    return response.Parameter?.Value || null;
-  } catch (error) {
-    console.error(`Error fetching secret ${parameterName}:`, error);
-    return null;
-  }
-}
-
 export async function POST(req: NextRequest, { params }: { params: { action: string } }) {
   try {
     const { username, password, email } = await req.json();
     const { action } = await params;
-    const appId = process.env.NEXT_PUBLIC_AWS_APP_ID;
-    if (!appId) {
-      throw new Error("NEXT_PUBLIC_AWS_APP_ID is missing in environment variables.");
-    }
-    const clientId = await getSecret(`/amplify/shared/${appId}/NEXT_PUBLIC_COGNITO_CLIENT_ID`);
-    if (!clientId) throw new Error("Cognito Client ID is missing!");
 
     let command;
 
     if (action === 'signup') {
       command = new SignUpCommand({
-        ClientId: clientId,
+        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
         Username: username,
         Password: password,
         UserAttributes: [{ Name: 'email', Value: email }],
@@ -54,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
 
       command = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
-        ClientId: clientId,
+        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
         AuthParameters: authParams, // Use the correct structure here!
       });
 
