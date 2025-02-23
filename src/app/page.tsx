@@ -65,6 +65,20 @@ export default function Home() {
             >
               Get Started
             </Button>
+
+            <Button
+              variant="contained"
+              size="large"
+              sx={{ mt: 3, bgcolor: 'primary.main', color: 'white' }} // Set text color explicitly
+              component="a"
+              href="https://github.com/LokoMoloko98/nextcognito-boilerplate"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Boilerplate Github Repo
+            </Button>
+
+
           </Box>
         </Container>
       </ThemeProvider>
