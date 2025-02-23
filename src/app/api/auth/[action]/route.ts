@@ -37,6 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
         USERNAME: username, // Important: Case-sensitive!
         PASSWORD: password, // Important: Case-sensitive!
       };
+      console.log("Client ID:", clientId);
 
       command = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
