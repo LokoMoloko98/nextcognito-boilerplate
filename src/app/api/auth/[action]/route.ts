@@ -1,22 +1,31 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { CognitoIdentityProviderClient, SignUpCommand, InitiateAuthCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { fromEnv } from "@aws-sdk/credential-providers";
+import { secret } from '@aws-amplify/backend';
 
-const cognitoIdentityProviderClient = new CognitoIdentityProviderClient({
-  region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1',
-  credentials: fromEnv(),
-});
+async function getSecretValue(secretName: string): Promise<string> {
+  const secretValue = await secret(secretName);
+  return String(secretValue); // Ensures it's explicitly cast to a string
+}
 
 export async function POST(req: NextRequest, { params }: { params: { action: string } }) {
   try {
     const { username, password, email } = await req.json();
     const { action } = await params;
 
+    const clientId = await getSecretValue('NEXT_PUBLIC_COGNITO_CLIENT_ID');
+    const region = await getSecretValue('NEXT_PUBLIC_AWS_REGION');
+
+    const cognitoIdentityProviderClient = new CognitoIdentityProviderClient({
+      region: region || 'us-east-1',
+      credentials: fromEnv(),
+    });
+
     let command;
 
     if (action === 'signup') {
       command = new SignUpCommand({
-        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
+        ClientId:  clientId,
         Username: username,
         Password: password,
         UserAttributes: [{ Name: 'email', Value: email }],
@@ -31,7 +40,7 @@ export async function POST(req: NextRequest, { params }: { params: { action: str
 
       command = new InitiateAuthCommand({
         AuthFlow: 'USER_PASSWORD_AUTH',
-        ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID,
+        ClientId: clientId,
         AuthParameters: authParams, // Use the correct structure here!
       });
 
