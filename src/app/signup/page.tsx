@@ -24,47 +24,46 @@ const theme = createTheme({
   },
 });
 
-export default function SignIn() {
-  const [username, setUsername] = useState('');
+export default function SignUp() {
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('');
+  // const [name, setName] = useState('');
+  // const [nickname, setNickname] = useState('');
   const [error, setError] = useState(null);
   const router = useRouter();
-  const { refreshAuthStatus, isLoggedIn } = useAuthContext();
+  const { isLoggedIn } = useAuthContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn) {
-      router.push('/authenticated-home ');
+      router.push('/authenticated-home '); // Redirect logged-in users
     }
   }, [isLoggedIn, router]);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: any, action: string) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError('');
-  
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/auth/signin`, {
+      const response = await fetch(`/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ password, email}),
       });
-  
-      const data = await response.json();
-  
-      if (data.challenge === 'NEW_PASSWORD_REQUIRED') {
-        // Redirect manually using router.push() to avoid CORS issues
-        router.push(`/complete-password?username=${data.username}&session=${data.session}`);
-        return;
-      }
-  
+
       if (!response.ok) {
-        throw new Error(data.error || 'Authentication failed');
+        const data = await response.json();
+        throw new Error(data.error || 'Sign up failed');
       }
-  
-      console.log('Sign in success');
-      await refreshAuthStatus();
-  
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -88,7 +87,7 @@ export default function SignIn() {
   }
 
   return (
-    <ThemeProvider theme={theme}> 
+    <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <Box
@@ -107,26 +106,25 @@ export default function SignIn() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            Sign Up
           </Typography>
-          {error && ( // Display error message
+          {error && (
             <Typography variant="body2" color="error" align="center" sx={{ mt: 1 }}>
               {error}
             </Typography>
           )}
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-
+          <Box component="form" onSubmit={(e) => handleSubmit(e, 'signup')} noValidate sx={{ mt: 1 }}>
             <TextField
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoComplete="username"
+              id="email"
+              label="Email"
+              name="email"
+              autoComplete="email"
               autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
             <TextField
               margin="normal"
@@ -136,17 +134,29 @@ export default function SignIn() {
               label="Password"
               type="password"
               id="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Confirm Password"
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
             />
             <Button
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
+              disabled={isSubmitting}
             >
-              Sign In
+              {isSubmitting ? 'Signing Up...' : 'Sign Up'}
             </Button>
           </Box>
         </Box>
